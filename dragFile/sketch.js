@@ -3,13 +3,12 @@
 function setup() {
   noCanvas();
     
-  let d=createElement("div","Drop to upload");
+  let d=createElement("div","Drag file to upload");
   d.addClass("msg");  
   d.dragOver(dropping);
   d.dragLeave(notdropping);
   d.drop(gotFile,notdropping);
 }
-
 function gotFile(file){
   createP(`${file.name} type:${file.type} size:${file.size}`);
 }
