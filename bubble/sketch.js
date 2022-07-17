@@ -67,17 +67,9 @@ class Bubble {
   }
   contains(x, y) {
     //console.log(`s ${x} ${y} ${this.x} ${this.y} ${dist(x,y,this.x,this.y)} ${this.r}`)
-    if (dist(x, y, this.x, this.y) < this.r) {
-      return true;
-    } else {
-      return false;
-    }
+    return dist(x, y, this.x, this.y) < this.r;
   }
   intersects(b) {
-    if (dist(this.x, this.y, b.x, b.y) < this.r + b.r) {
-      return true;
-    } else {
-      return false;
-    }
+    return dist(this.x, this.y, b.x, b.y) < this.r + b.r;
   }
 }
