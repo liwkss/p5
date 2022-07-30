@@ -8,8 +8,8 @@ function setup() {
   noCanvas();
   query=createInput();
   query.changed(()=>{
-    //result.html("");
-    //createP(query.value()).parent(result);
+	result.html("");
+    createP("Loading for "+query.value()).parent(result);
     loadJSON(url + query.value()+url2, gotData);
   });
   result=createP("Enter the query and press ENTER");
