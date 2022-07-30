@@ -1,5 +1,5 @@
 var url="https://api.nytimes.com/svc/search/v2/articlesearch.json?q=";
-var url2="&api-key="+config.SECRET_API_KEY;
+var url2="&api-key="+config.SECRET_NYT_API_KEY;
 
 var query;
 var result;
