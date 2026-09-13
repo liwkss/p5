@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Real-Time Queue Display</title>
+  <style>
+    * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
+    body { background-color: #f4f7f6; color: #333; padding: 20px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; }
+    h1 { font-size: 1.8rem; color: #1a365d; }
+    
+    .grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 20px; }
+    
+    .card { background: white; border-radius: 12px; padding: 25px; text-align: center; box-shadow: 0 4px 6px rgba(0,0,0,0.05); }
+    .card h2 { font-size: 1.1rem; color: #4a5568; margin-bottom: 15px; height: 45px; display: flex; align-items: center; justify-content: center; }
+    .number-display { font-size: 4rem; font-weight: bold; color: #2b6cb0; margin-bottom: 15px; }
+    
+    .admin-controls { display: none; gap: 10px; justify-content: center; }
+    .btn { padding: 10px 18px; border: none; border-radius: 6px; cursor: pointer; font-size: 1.2rem; font-weight: bold; }
+    .btn-inc { background-color: #48bb78; color: white; }
+    .btn-dec { background-color: #e53e3e; color: white; }
+    .btn-set { background-color: #4a5568; color: white; font-size: 0.9rem; margin-top: 10px; width: 100%; }
+    .num-input { width: 80px; text-align: center; font-size: 1rem; padding: 5px; border: 1px solid #ccc; border-radius: 4px; }
+    
+    .auth-btn { background: #2b6cb0; color: white; border: none; padding: 10px 16px; border-radius: 6px; cursor: pointer; font-weight: 600; }
+    .admin-active .admin-controls { display: flex; flex-wrap: wrap; }
+  </style>
+
+  <!-- Firebase Web SDK (Compat version for standard script usage) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+</head>
+<body>
+
+  <header>
+    <h1>Booth Queue System</h1>
+    <button class="auth-btn" id="adminToggleBtn" onclick="toggleAdmin()">Staff Login</button>
+  </header>
+
+  <div class="grid" id="mainGrid">
+    <!-- Booth 1 -->
+    <div class="card">
+      <h2>Meeting Room A<br>Assessment Booth</h2>
+      <div class="number-display" id="display-booth1">--</div>
+      <div class="admin-controls">
+        <button class="btn btn-dec" onclick="updateNumber('booth1', -1)">-</button>
+        <button class="btn btn-inc" onclick="updateNumber('booth1', 1)">+</button>
+        <div>
+          <input type="number" id="input-booth1" class="num-input" placeholder="Set #">
+          <button class="btn btn-set" onclick="setDirectNumber('booth1')">Set</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booth 2 -->
+    <div class="card">
+      <h2>Meeting Room A<br>Vaccination Booth</h2>
+      <div class="number-display" id="display-booth2">--</div>
+      <div class="admin-controls">
+        <button class="btn btn-dec" onclick="updateNumber('booth2', -1)">-</button>
+        <button class="btn btn-inc" onclick="updateNumber('booth2', 1)">+</button>
+        <div>
+          <input type="number" id="input-booth2" class="num-input" placeholder="Set #">
+          <button class="btn btn-set" onclick="setDirectNumber('booth2')">Set</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booth 3 -->
+    <div class="card">
+      <h2>Official Waiting Room<br>Assessment Booth</h2>
+      <div class="number-display" id="display-booth3">--</div>
+      <div class="admin-controls">
+        <button class="btn btn-dec" onclick="updateNumber('booth3', -1)">-</button>
+        <button class="btn btn-inc" onclick="updateNumber('booth3', 1)">+</button>
+        <div>
+          <input type="number" id="input-booth3" class="num-input" placeholder="Set #">
+          <button class="btn btn-set" onclick="setDirectNumber('booth3')">Set</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Booth 4 -->
+    <div class="card">
+      <h2>Meeting Room B<br>Vaccination Booth</h2>
+      <div class="number-display" id="display-booth4">--</div>
+      <div class="admin-controls">
+        <button class="btn btn-dec" onclick="updateNumber('booth4', -1)">-</button>
+        <button class="btn btn-inc" onclick="updateNumber('booth4', 1)">+</button>
+        <div>
+          <input type="number" id="input-booth4" class="num-input" placeholder="Set #">
+          <button class="btn btn-set" onclick="setDirectNumber('booth4')">Set</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // --- SET YOUR PASSWORD HERE ---
+    const ADMIN_PASSWORD = "admin123"; 
+
+    // --- REPLACE THIS WITH YOUR FIREBASE CONFIG FROM STEP 1 ---
+	// Your web app's Firebase configuration
+	// For Firebase JS SDK v7.20.0 and later, measurementId is optional
+	const firebaseConfig = {
+	  apiKey: "AIzaSyCSiQ3b5dp47B8RfrUUVzGSKNrJ2ZvkF2s",
+	  authDomain: "queue-display-db5d6.firebaseapp.com",
+	  projectId: "queue-display-db5d6",
+	  storageBucket: "queue-display-db5d6.firebasestorage.app",
+	  messagingSenderId: "10751559693",
+	  appId: "1:10751559693:web:90848b5d9a67e15411ed44",
+	  measurementId: "G-DLNH6MHJKB"
+	};
+
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+    let isAdmin = false;
+
+    // Real-time synchronization listener (Syncs across ALL connected devices instantly)
+    db.ref('booths').on('value', (snapshot) => {
+      const data = snapshot.val() || { booth1: 0, booth2: 0, booth3: 0, booth4: 0 };
+      
+      document.getElementById('display-booth1').innerText = data.booth1 ?? 0;
+      document.getElementById('display-booth2').innerText = data.booth2 ?? 0;
+      document.getElementById('display-booth3').innerText = data.booth3 ?? 0;
+      document.getElementById('display-booth4').innerText = data.booth4 ?? 0;
+    });
+
+    // Password Login Toggle
+    function toggleAdmin() {
+      if (!isAdmin) {
+        const pwd = prompt("Enter Password to edit numbers:");
+        if (pwd === ADMIN_PASSWORD) {
+          isAdmin = true;
+          document.body.classList.add('admin-active');
+          document.getElementById('adminToggleBtn').innerText = "Logout Staff";
+        } else if (pwd !== null) {
+          alert("Incorrect password!");
+        }
+      } else {
+        isAdmin = false;
+        document.body.classList.remove('admin-active');
+        document.getElementById('adminToggleBtn').innerText = "Staff Login";
+      }
+    }
+
+    // Increment / Decrement numbers
+    function updateNumber(boothId, change) {
+      db.ref(`booths/${boothId}`).transaction((currentValue) => {
+        return Math.max(0, (currentValue || 0) + change);
+      });
+    }
+
+    // Set specific custom number
+    function setDirectNumber(boothId) {
+      const inputVal = document.getElementById(`input-${boothId}`).value;
+      if (inputVal !== "") {
+        db.ref(`booths/${boothId}`).set(parseInt(inputVal));
+        document.getElementById(`input-${boothId}`).value = "";
+      }
+    }
+  </script>
+</body>
+</html>
+
