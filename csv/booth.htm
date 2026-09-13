@@ -97,8 +97,6 @@
   </div>
 
   <script>
-    // --- SET YOUR PASSWORD HERE ---
-    const ADMIN_PASSWORD = "admin123"; 
 
     // --- REPLACE THIS WITH YOUR FIREBASE CONFIG FROM STEP 1 ---
 	// Your web app's Firebase configuration
@@ -131,8 +129,8 @@
     // Password Login Toggle
     function toggleAdmin() {
       if (!isAdmin) {
-        const pwd = prompt("Enter Password to edit numbers:");
-        if (pwd === ADMIN_PASSWORD) {
+        const p = prompt("Enter Password to edit numbers:");
+        if (p === "chp") {
           isAdmin = true;
           document.body.classList.add('admin-active');
           document.getElementById('adminToggleBtn').innerText = "Logout Staff";
